@@ -16,7 +16,7 @@ var summarizeCmd = &cobra.Command{
 		provider, _ := cmd.Flags().GetString("provider")
 		apiKey, _ := cmd.Flags().GetString("api-key")
 
-		s, err := summarizer.NewFromRequest(provider, apiKey, cfg)
+		s, err := summarizer.NewFromRequest(provider, apiKey, "", cfg)
 		if err != nil {
 			return fmt.Errorf("init summarizer: %w", err)
 		}

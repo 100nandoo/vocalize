@@ -68,7 +68,8 @@
       <div class="card">
         <div class="info-row">
           <span class="pill">Groq</span>
-          <span class="ocr-hint">Free tier · 30 req/min · no billing required</span>
+          <span class="ocr-hint">Free tier · no billing required</span>
+          <a href="https://console.groq.com/docs/rate-limits" target="_blank" rel="noopener" class="settings-link" style="margin-left:auto;font-size:12px;">Rate limits ↗</a>
         </div>
         <div class="settings-form">
           <div class="settings-field">
@@ -78,6 +79,30 @@
               Get your key at
               <a href="https://console.groq.com/keys" target="_blank" rel="noopener" class="settings-link">console.groq.com</a>
             </p>
+          </div>
+        </div>
+
+        <!-- Live usage from last API response -->
+        <div class="rate-usage-section" id="groq-usage-section" hidden>
+          <div class="rate-usage-header">
+            <span class="rate-usage-title">Current Usage</span>
+            <span class="rate-usage-ts" id="groq-usage-ts"></span>
+          </div>
+          <div class="rate-usage-row">
+            <span class="rate-usage-label">Requests remaining today (RPD)</span>
+            <div class="rate-usage-bar-wrap">
+              <div class="rate-usage-bar"><div class="rate-usage-bar-fill" id="groq-req-bar" style="width:0%"></div></div>
+              <span class="rate-usage-numbers" id="groq-req-numbers"></span>
+            </div>
+            <span class="rate-usage-reset" id="groq-req-reset"></span>
+          </div>
+          <div class="rate-usage-row">
+            <span class="rate-usage-label">Tokens remaining this minute (TPM)</span>
+            <div class="rate-usage-bar-wrap">
+              <div class="rate-usage-bar"><div class="rate-usage-bar-fill" id="groq-tok-bar" style="width:0%"></div></div>
+              <span class="rate-usage-numbers" id="groq-tok-numbers"></span>
+            </div>
+            <span class="rate-usage-reset" id="groq-tok-reset"></span>
           </div>
         </div>
       </div>

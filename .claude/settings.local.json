@@ -9,7 +9,8 @@
       "Bash(brew install *)",
       "Bash(./vocalize serve *)",
       "Bash(curl -X POST http://localhost:8080/api/summarize -H \"Content-Type: application/json\" -d '{\"text\":\"The quick brown fox jumps over the lazy dog. This is a test sentence. Summarization is a useful feature for condensing long text into shorter summaries that maintain the key points and information.\"}')",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(kill 36929)"
     ]
   }
 }

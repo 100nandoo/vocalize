@@ -43,6 +43,7 @@ type summarizeRequest struct {
 	Instruction string `json:"instruction"`
 	Provider    string `json:"provider"` // optional: override server-configured provider
 	APIKey      string `json:"apiKey"`   // optional: key supplied from web UI
+	Model       string `json:"model"`    // optional: override provider default model
 }
 
 type summarizerConfigResponse struct {
@@ -51,9 +52,10 @@ type summarizerConfigResponse struct {
 }
 
 type summarizeResponse struct {
-	Summary  string `json:"summary"`
-	Provider string `json:"provider"`
-	Model    string `json:"model"`
+	Summary    string                  `json:"summary"`
+	Provider   string                  `json:"provider"`
+	Model      string                  `json:"model"`
+	RateLimits *summarizer.RateLimits  `json:"rateLimits,omitempty"`
 }
 
 func handleSpeak(g *gemini.Client, cfg *config.Config) http.HandlerFunc {
@@ -209,9 +211,9 @@ func handleSummarize(serverSum summarizer.Summarizer, cfg *config.Config) http.H
 
 		s := serverSum
 		usedProvider := cfg.SummarizerProvider
-		if req.Provider != "" || req.APIKey != "" {
+		if req.Provider != "" || req.APIKey != "" || req.Model != "" {
 			var err error
-			s, err = summarizer.NewFromRequest(req.Provider, req.APIKey, cfg)
+			s, err = summarizer.NewFromRequest(req.Provider, req.APIKey, req.Model, cfg)
 			if err != nil {
 				writeJSON(w, http.StatusBadRequest, errResponse{err.Error()})
 				return
@@ -235,10 +237,19 @@ func handleSummarize(serverSum summarizer.Summarizer, cfg *config.Config) http.H
 			return
 		}
 
+		usedModel := req.Model
+		if usedModel == "" {
+			usedModel = modelForProvider(usedProvider, cfg)
+		}
+		var rateLimits *summarizer.RateLimits
+		if rl, ok := s.(summarizer.RateLimiter); ok {
+			rateLimits = rl.GetLastRateLimits()
+		}
 		writeJSON(w, http.StatusOK, summarizeResponse{
-			Summary:  summary,
-			Provider: usedProvider,
-			Model:    modelForProvider(usedProvider, cfg),
+			Summary:    summary,
+			Provider:   usedProvider,
+			Model:      usedModel,
+			RateLimits: rateLimits,
 		})
 	}
 }
