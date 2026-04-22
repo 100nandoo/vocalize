@@ -6,6 +6,7 @@ All subcommands share the same binary: `./vocalize`.
 
 - [Global](#global)
 - [`speak` — Synthesize text](#speak--synthesize-text)
+- [`summarize` — Summarize text](#summarize--summarize-text)
 - [`ocr` — Extract text from an image](#ocr--extract-text-from-an-image)
 - [`serve` — Start the web server](#serve--start-the-web-server)
 - [`pdf` — Convert PDF to images](#pdf--convert-pdf-to-images)
@@ -28,7 +29,7 @@ All subcommands share the same binary: `./vocalize`.
 ./vocalize speak [flags] <text>
 ```
 
-Synthesizes the given text and plays it. Exits when playback finishes.
+Synthesizes the given text and plays it. Exits when playback finishes. Requires `GEMINI_API_KEY`.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -54,6 +55,43 @@ Synthesizes the given text and plays it. Exits when playback finishes.
 
 # Save and play
 ./vocalize speak --export hello.opus --play "Hello, world!"
+```
+
+---
+
+## `summarize` — Summarize text
+
+```sh
+./vocalize summarize [flags] <text>
+```
+
+Summarizes the given text using a configured AI provider and prints the result to stdout. Supports Gemini, Groq (free tier), and OpenRouter (free models). Does **not** require `GEMINI_API_KEY` unless the provider is set to `gemini`.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--instruction <text>` | — | Custom summarization instruction. Defaults to a structured prompt with headers and bullet lists |
+| `--provider <name>` | `$SUMMARIZER_PROVIDER` | Override provider: `gemini`, `groq`, or `openrouter` |
+| `--api-key <key>` | env var | API key for the provider (overrides `GROQ_API_KEY` / `OPENROUTER_API_KEY`) |
+
+The provider is auto-detected from env vars if `--provider` is not set: `GEMINI_API_KEY` → gemini, `GROQ_API_KEY` → groq, `OPENROUTER_API_KEY` → openrouter.
+
+**Examples**
+
+```sh
+# Using the server-configured provider
+./vocalize summarize "Go is a statically typed, compiled language..."
+
+# Groq (free tier)
+GROQ_API_KEY=gsk_... ./vocalize summarize "Go is a statically typed language..."
+
+# OpenRouter (free models)
+OPENROUTER_API_KEY=sk-or-... ./vocalize summarize "Go is a statically typed language..."
+
+# Override provider and key inline
+./vocalize summarize --provider groq --api-key gsk_... "Long article text..."
+
+# Custom instruction
+./vocalize summarize --instruction "Summarize in one sentence." "Long article text..."
 ```
 
 ---
@@ -100,7 +138,7 @@ Optionally synthesizes the extracted text with TTS using `--speak`.
 ./vocalize serve [flags]
 ```
 
-Starts an HTTP server serving the web UI at `http://localhost:8080`.
+Starts an HTTP server serving the web UI at `http://localhost:8080`. `GEMINI_API_KEY` is only required if you use TTS; summarization works with Groq or OpenRouter keys alone.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -113,6 +151,9 @@ Starts an HTTP server serving the web UI at `http://localhost:8080`.
 ./vocalize serve
 ./vocalize serve --port 3000
 ./vocalize serve --port 3000 --host 0.0.0.0
+
+# Summarize-only mode (no TTS)
+GROQ_API_KEY=gsk_... ./vocalize serve
 ```
 
 ---
@@ -143,7 +184,7 @@ Converts each page of the PDF to a numbered PNG image.
 
 ## Interactive TUI
 
-Running `./vocalize` without any subcommand launches the Bubble Tea terminal UI.
+Running `./vocalize` without any subcommand launches the Bubble Tea terminal UI. Requires `GEMINI_API_KEY`.
 
 ```sh
 ./vocalize

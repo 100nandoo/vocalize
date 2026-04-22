@@ -21,10 +21,11 @@ Text-to-speech powered by Google Gemini, with a modern web UI and an interactive
 ## Features
 
 - **Web UI** — dark interface with model & voice dropdowns, gender filter, waveform indicator, and Opus download
-- **Image OCR** — drag-and-drop or browse to upload an image; extracted text appears in a copyable box and can be synthesized in one click
-- **Synthesis metadata** — activity feed shows word count and how long each synthesis took
+- **Image OCR** — drag-and-drop or browse to upload images (multi-file supported); extracted text can be synthesized or summarized in one click
+- **Summarizer** — summarize text with Gemini, Groq (free tier), or OpenRouter (free models); results rendered as Markdown; provider and API keys configurable in the Settings page without restarting the server
+- **Synthesis metadata** — activity feed shows word count, duration, voice, model, and summarizer model used
 - **Interactive TUI** — Bubble Tea terminal UI with scrollable history and a command menu
-- **One-shot CLI** — pipe-friendly `speak` and `ocr` subcommands for scripts and automation
+- **One-shot CLI** — pipe-friendly `speak`, `summarize`, and `ocr` subcommands for scripts and automation
 - **PDF converter** — convert PDF pages to numbered PNG images with the `pdf` subcommand
 - **Single binary** — web assets embedded via `go:embed`, no separate file serving
 - **Rate limit handling** — quota errors surface as a friendly message instead of a raw API error
@@ -38,7 +39,8 @@ Text-to-speech powered by Google Gemini, with a modern web UI and an interactive
 
 ```sh
 cp .env.example .env
-# add your GEMINI_API_KEY to .env
+# GEMINI_API_KEY is required for TTS and the interactive TUI.
+# For summarization only, GROQ_API_KEY or OPENROUTER_API_KEY is enough.
 ```
 
 ```sh
@@ -56,7 +58,9 @@ go build -o vocalize .
 
 Choose a **model** and **voice** from the dropdowns, type your text, and hit **Synthesize**. Download the result with the **Download** button.
 
-To use OCR, drop or browse an image in the **Image OCR** card at the top. The extracted text appears in a copyable box — click **Synthesize** to convert it to speech.
+To use OCR, drop or browse images in the **Image OCR** card. The extracted text appears in a copyable box — click **Synthesize** to convert it to speech, or **Summarize** to get a Markdown summary.
+
+To configure the summarizer provider and API key, click **Settings** in the top-right corner.
 
 Flags: `--port 3000`, `--host 0.0.0.0`
 
@@ -66,6 +70,10 @@ Flags: `--port 3000`, `--host 0.0.0.0`
 # Synthesize text
 ./vocalize speak "Hello, world!"
 ./vocalize speak --voice Puck --export hello.opus "Hello, world!"
+
+# Summarize text
+./vocalize summarize "Long article text..."
+./vocalize summarize --provider groq --api-key gsk_... "Long article text..."
 
 # OCR — extract text from an image
 ./vocalize ocr screenshot.png
@@ -99,14 +107,18 @@ Press **Enter** on an empty prompt to open the command menu. Navigate with **↑
 ## API
 
 ```
-POST /api/speak   { "text": "...", "voice": "Kore", "model": "..." }
-                  → { "opus": "<base64 Ogg Opus>" }
+POST /api/speak          { "text": "...", "voice": "Kore", "model": "..." }
+                         → { "opus": "<base64 Ogg Opus>" }
 
-POST /api/ocr     multipart/form-data  file=<image>
-                  → { "text": "..." }
+POST /api/ocr            multipart/form-data  files=<image(s)>
+                         → { "text": "..." }
 
-GET  /api/voices  → { "voices": [...], "default": "Kore" }
-GET  /api/models  → { "models": [...], "default": "..." }
+POST /api/summarize      { "text": "...", "instruction"?, "provider"?, "apiKey"? }
+                         → { "summary": "...", "provider": "...", "model": "..." }
+
+GET  /api/summarizer-config  → { "provider": "...", "model": "..." }
+GET  /api/voices             → { "voices": [...], "default": "Kore" }
+GET  /api/models             → { "models": [...], "default": "..." }
 ```
 
 See [docs/api.md](docs/api.md) for the full reference with curl examples.
@@ -143,30 +155,38 @@ See [docs/api.md](docs/api.md) for the full reference with curl examples.
 
 ## Configuration
 
-| Variable         | Default                        | Description                        |
-| ---------------- | ------------------------------ | ---------------------------------- |
-| `GEMINI_API_KEY` | —                              | Required. Your Gemini API key      |
-| `DEFAULT_VOICE`  | `Kore`                         | Default voice name                 |
-| `DEFAULT_MODEL`  | `gemini-2.5-flash-preview-tts` | Default TTS model                  |
-| `PORT`           | `8080`                         | Web server port                    |
-| `HOST`           | `127.0.0.1`                    | Web server bind address            |
+| Variable               | Default                        | Description                                                    |
+| ---------------------- | ------------------------------ | -------------------------------------------------------------- |
+| `GEMINI_API_KEY`       | —                              | Required for TTS and Gemini summarization                      |
+| `DEFAULT_VOICE`        | `Kore`                         | Default voice name                                             |
+| `DEFAULT_MODEL`        | `gemini-3.1-flash-tts-preview` | Default TTS model                                              |
+| `PORT`                 | `8080`                         | Web server port                                                |
+| `HOST`                 | `127.0.0.1`                    | Web server bind address                                        |
+| `SUMMARIZER_PROVIDER`  | auto-detected                  | Summarizer provider: `gemini`, `groq`, or `openrouter`         |
+| `GROQ_API_KEY`         | —                              | Required when provider is `groq`                               |
+| `GROQ_MODEL`           | `llama-3.3-70b-versatile`      | Groq model to use                                              |
+| `OPENROUTER_API_KEY`   | —                              | Required when provider is `openrouter`                         |
+| `OPENROUTER_MODEL`     | `google/gemma-3-27b-it:free`   | OpenRouter model to use (`:free` suffix = no credits consumed) |
+
+`SUMMARIZER_PROVIDER` is auto-detected if not set: uses `gemini` if `GEMINI_API_KEY` is present, then `groq` if `GROQ_API_KEY` is present, then `openrouter` if `OPENROUTER_API_KEY` is present.
 
 ## Project structure
 
 ```
 ├── main.go                    # Entry point
 ├── embed.go                   # Embeds web/ into binary
-├── cmd/                       # CLI commands (root, speak, serve, ocr, pdf)
+├── cmd/                       # CLI commands (root, speak, summarize, serve, ocr, pdf)
 ├── docs/                      # API and CLI documentation
 ├── internal/
 │   ├── config/                # Env/config loading and validation
-│   ├── gemini/                # Gemini TTS client + rate-limit detection
+│   ├── gemini/                # Gemini TTS + summarization client
+│   ├── summarizer/            # Summarizer interface + Groq and OpenRouter clients
 │   ├── audio/                 # Opus encoder (Ogg container), platform audio player
 │   ├── tui/                   # Bubble Tea TUI (model, view, update)
 │   ├── ocr/                   # Tesseract OCR wrapper
 │   ├── pdf/                   # PDF-to-image converter (go-fitz/MuPDF)
 │   └── server/                # HTTP server + REST handlers
-└── web/                       # Embedded frontend (HTML/CSS/JS)
+└── web/                       # Embedded frontend (HTML/CSS/JS, settings page)
 ```
 
 ## Requirements

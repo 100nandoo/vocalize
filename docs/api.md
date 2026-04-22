@@ -6,6 +6,8 @@ The web server exposes a JSON REST API on `http://localhost:8080` (default). All
 
 - [`POST /api/speak`](#post-apispeak)
 - [`POST /api/ocr`](#post-apiocr)
+- [`POST /api/summarize`](#post-apisummarize)
+- [`GET /api/summarizer-config`](#get-apisummarizer-config)
 - [`GET /api/voices`](#get-apivoices)
 - [`GET /api/models`](#get-apimodels)
 - [Playing Opus audio in the browser](#playing-opus-audio-in-the-browser)
@@ -14,7 +16,7 @@ The web server exposes a JSON REST API on `http://localhost:8080` (default). All
 
 ## `POST /api/speak`
 
-Synthesize text to Ogg Opus audio.
+Synthesize text to Ogg Opus audio. Requires `GEMINI_API_KEY`.
 
 **Request body**
 
@@ -50,6 +52,7 @@ Decode the `opus` field from base64 to get the raw Ogg Opus bytes (24 kHz · PCM
 | `400` | `{"error": "invalid voice: ..."}` | Unknown voice name |
 | `400` | `{"error": "invalid model: ..."}` | Unknown model name |
 | `429` | `{"error": "rate limited — wait a moment and try again"}` | Gemini quota exceeded |
+| `503` | `{"error": "TTS unavailable — GEMINI_API_KEY not configured"}` | Missing API key |
 | `500` | `{"error": "..."}` | Unexpected server error |
 
 **curl example**
@@ -68,7 +71,7 @@ mpv hello.opus
 
 ## `POST /api/ocr`
 
-Extract text from an uploaded image using Tesseract OCR.
+Extract text from one or more uploaded images using Tesseract OCR.
 
 **Request**
 
@@ -76,7 +79,7 @@ Extract text from an uploaded image using Tesseract OCR.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `file` | file | yes | Image file (PNG, JPEG, WebP, TIFF, or any Tesseract-supported format) |
+| `files` | file[] | yes | One or more image files (PNG, JPEG, WebP, TIFF). Use `file` as a fallback for single-file requests |
 
 **Response `200 OK`**
 
@@ -86,27 +89,33 @@ Extract text from an uploaded image using Tesseract OCR.
 }
 ```
 
-Returns an empty string in `text` if no text was detected.
+When multiple files are uploaded, extracted text is joined with a blank line between each image. Returns an empty string in `text` if no text was detected.
 
 **Errors**
 
 | Status | Body | When |
 |--------|------|------|
-| `400` | `{"error": "file is required"}` | No file field in form |
+| `400` | `{"error": "at least one file is required"}` | No file field in form |
 | `400` | `{"error": "invalid multipart form"}` | Malformed form data |
 | `500` | `{"error": "..."}` | Tesseract not installed or other error |
 
 **curl example**
 
 ```sh
-# Extract text only
+# Single image
 curl -s -X POST http://localhost:8080/api/ocr \
-  -F "file=@screenshot.png" \
+  -F "files=@screenshot.png" \
+  | jq -r '.text'
+
+# Multiple images
+curl -s -X POST http://localhost:8080/api/ocr \
+  -F "files=@page1.png" \
+  -F "files=@page2.png" \
   | jq -r '.text'
 
 # Extract text then pipe into /api/speak
 TEXT=$(curl -s -X POST http://localhost:8080/api/ocr \
-  -F "file=@screenshot.png" \
+  -F "files=@screenshot.png" \
   | jq -r '.text')
 
 curl -s -X POST http://localhost:8080/api/speak \
@@ -114,6 +123,97 @@ curl -s -X POST http://localhost:8080/api/speak \
   -d "{\"text\": \"$TEXT\", \"voice\": \"Kore\"}" \
   | jq -r '.opus' \
   | base64 -d > output.opus
+```
+
+---
+
+## `POST /api/summarize`
+
+Summarize text using a configured AI provider (Gemini, Groq, or OpenRouter). The server uses the provider set by `SUMMARIZER_PROVIDER`; the request can override this per-call via `provider` and `apiKey`.
+
+**Request body**
+
+```json
+{
+  "text":        "Long text to summarize...",
+  "instruction": "Summarize in three bullet points.",
+  "provider":    "groq",
+  "apiKey":      "gsk_..."
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `text` | string | yes | Text to summarize |
+| `instruction` | string | no | Custom summarization instruction. Defaults to a built-in prompt using headers and bullet lists |
+| `provider` | string | no | Override the server provider: `gemini`, `groq`, or `openrouter` |
+| `apiKey` | string | no | API key for the provider (used by the web UI Settings page; falls back to the server's env var) |
+
+**Response `200 OK`**
+
+```json
+{
+  "summary":  "## Key Points\n\n- ...",
+  "provider": "groq",
+  "model":    "llama-3.3-70b-versatile"
+}
+```
+
+The `summary` field is Markdown-formatted text. `provider` and `model` reflect what was actually used.
+
+**Errors**
+
+| Status | Body | When |
+|--------|------|------|
+| `400` | `{"error": "text is required"}` | Empty text |
+| `400` | `{"error": "..."}` | Unknown provider or missing API key for requested provider |
+| `429` | `{"error": "rate limited — wait a moment and try again"}` | Provider quota exceeded |
+| `503` | `{"error": "no summarizer configured — set a provider and API key"}` | No provider configured server-side and none supplied in the request |
+| `500` | `{"error": "..."}` | Unexpected server error |
+
+**curl examples**
+
+```sh
+# Using the server's configured provider
+curl -s -X POST http://localhost:8080/api/summarize \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "Go is a statically typed language..."}' \
+  | jq -r '.summary'
+
+# Override provider and key per-request
+curl -s -X POST http://localhost:8080/api/summarize \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "Go is a statically typed language...", "provider": "groq", "apiKey": "gsk_..."}' \
+  | jq '{summary, provider, model}'
+
+# Custom instruction
+curl -s -X POST http://localhost:8080/api/summarize \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "...", "instruction": "Summarize in one sentence."}' \
+  | jq -r '.summary'
+```
+
+---
+
+## `GET /api/summarizer-config`
+
+Returns the server's current summarizer configuration. Does **not** expose the API key.
+
+**Response `200 OK`**
+
+```json
+{
+  "provider": "groq",
+  "model":    "llama-3.3-70b-versatile"
+}
+```
+
+Both fields are empty strings when no provider is configured server-side.
+
+**curl example**
+
+```sh
+curl -s http://localhost:8080/api/summarizer-config | jq .
 ```
 
 ---
