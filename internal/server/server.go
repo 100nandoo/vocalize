@@ -22,6 +22,7 @@ func Start(cfg *config.Config, webFS embed.FS) error {
 	mux.HandleFunc("/api/speak", handleSpeak(g, cfg))
 	mux.HandleFunc("/api/voices", handleVoices(cfg))
 	mux.HandleFunc("/api/models", handleModels(cfg))
+	mux.HandleFunc("/api/ocr", handleOCR())
 
 	// Static files — strip the "web/" prefix from the embedded FS
 	webRoot, err := fs.Sub(webFS, "web")

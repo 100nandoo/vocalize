@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
 
 :root {
   --bg:       #0a0a0f;
@@ -313,3 +314,78 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   padding: 2px 10px;
 }
 .pill.accent { color: var(--accent2); border-color: rgba(124,106,247,.4); }
+
+/* ── OCR card ───────────────────────────────────────────────────────────── */
+.ocr-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.drop-zone {
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.drop-zone:hover,
+.drop-zone.drag-active {
+  border-color: var(--accent);
+  background: rgba(124,106,247,.06);
+  color: var(--text2);
+}
+.drop-zone.ocr-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.drop-zone svg {
+  color: var(--border2);
+  transition: color 0.15s;
+}
+.drop-zone:hover svg,
+.drop-zone.drag-active svg {
+  color: var(--accent2);
+}
+.drop-zone p { font-size: 13px; }
+.drop-hint { font-size: 11px; color: var(--muted); }
+
+.file-label {
+  color: var(--accent2);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.file-label:hover { color: var(--accent); }
+
+#ocr-result {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#ocr-text {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 12px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+#ocr-text:focus { border-color: var(--border2); }
+
+.ocr-actions {
+  display: flex;
+  gap: 8px;
+}

@@ -34,6 +34,7 @@ func init() {
 	rootCmd.AddCommand(speakCmd)
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(pdfCmd)
+	rootCmd.AddCommand(ocrCmd)
 }
 
 func initConfig() {

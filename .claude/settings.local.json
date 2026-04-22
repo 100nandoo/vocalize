@@ -4,7 +4,9 @@
       "Bash(go build *)",
       "Bash(go mod *)",
       "Bash(go doc *)",
-      "Bash(go get *)"
+      "Bash(go get *)",
+      "Bash(brew list *)",
+      "Bash(brew install *)"
     ]
   }
 }

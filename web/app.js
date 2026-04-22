@@ -33,6 +33,14 @@ const VOICES = [
 
 const DEFAULT_VOICE = "Kore";
 
+const dropZone       = document.getElementById('drop-zone');
+const fileInput      = document.getElementById('file-input');
+const ocrResult      = document.getElementById('ocr-result');
+const ocrText        = document.getElementById('ocr-text');
+const ocrCopyBtn     = document.getElementById('ocr-copy-btn');
+const ocrCopyLabel   = document.getElementById('ocr-copy-label');
+const ocrSynthBtn    = document.getElementById('ocr-synthesize-btn');
+
 const textInput      = document.getElementById('text-input');
 const modelSelect    = document.getElementById('model-select');
 const genderFilter   = document.getElementById('gender-filter');
@@ -48,6 +56,84 @@ const feedEmpty      = document.getElementById('feed-empty');
 
 let lastWavBlob = null;
 let processing  = false;
+
+// --- OCR drop zone ---
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('drag-active');
+});
+
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag-active');
+});
+
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-active');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) uploadImageForOCR(file);
+});
+
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (file) uploadImageForOCR(file);
+  fileInput.value = '';
+});
+
+async function uploadImageForOCR(file) {
+  dropZone.classList.add('ocr-loading');
+  document.getElementById('drop-hint').textContent = `Processing ${file.name}…`;
+  const item = addFeed('info', `OCR: ${file.name}`, 'extracting text…');
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch('/api/ocr', { method: 'POST', body: formData });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(body.error || res.statusText);
+    }
+
+    const { text } = await res.json();
+    ocrText.value = text || '';
+    ocrResult.hidden = false;
+
+    const wordCount = text ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+    document.getElementById('drop-hint').textContent = 'PNG, JPEG, WebP, TIFF supported';
+    updateFeedItem(item, 'ok', `OCR: ${file.name}`, `${wordCount} word${wordCount !== 1 ? 's' : ''} extracted`);
+  } catch (err) {
+    document.getElementById('drop-hint').textContent = 'PNG, JPEG, WebP, TIFF supported';
+    updateFeedItem(item, 'fail', `OCR: ${file.name}`, err.message);
+  } finally {
+    dropZone.classList.remove('ocr-loading');
+  }
+}
+
+ocrCopyBtn.addEventListener('click', async () => {
+  if (!ocrText.value) return;
+  try {
+    await navigator.clipboard.writeText(ocrText.value);
+    ocrCopyLabel.textContent = 'Copied!';
+    setTimeout(() => { ocrCopyLabel.textContent = 'Copy'; }, 1500);
+  } catch {
+    ocrText.select();
+    document.execCommand('copy');
+    ocrCopyLabel.textContent = 'Copied!';
+    setTimeout(() => { ocrCopyLabel.textContent = 'Copy'; }, 1500);
+  }
+});
+
+ocrSynthBtn.addEventListener('click', () => {
+  const text = ocrText.value.trim();
+  if (!text || processing) return;
+  textInput.value = text;
+  lastWavBlob = null;
+  speakBtn.disabled = true;
+  downloadBtn.disabled = true;
+  synthesizeText(text);
+});
 
 // --- Model dropdown ---
 

@@ -2,15 +2,37 @@
 
 Text-to-speech powered by Google Gemini, with a modern web UI and an interactive terminal — all in a single Go binary.
 
+## Table of Contents
+
+- [Features](#features)
+- [Documentation](#documentation)
+- [Setup](#setup)
+- [Usage](#usage)
+  - [Web server](#web-server)
+  - [One-shot CLI](#one-shot-cli)
+  - [Interactive TUI](#interactive-tui)
+- [API](#api)
+- [Models](#models)
+- [Voices](#voices)
+- [Configuration](#configuration)
+- [Project structure](#project-structure)
+- [Requirements](#requirements)
+
 ## Features
 
 - **Web UI** — dark interface with model & voice dropdowns, gender filter, waveform indicator, and Opus download
+- **Image OCR** — drag-and-drop or browse to upload an image; extracted text appears in a copyable box and can be synthesized in one click
 - **Synthesis metadata** — activity feed shows word count and how long each synthesis took
 - **Interactive TUI** — Bubble Tea terminal UI with scrollable history and a command menu
-- **One-shot CLI** — pipe-friendly `speak` subcommand for scripts and automation
-- **PDF converter** — convert PDF pages to numbered PNG images with `pdf` subcommand
+- **One-shot CLI** — pipe-friendly `speak` and `ocr` subcommands for scripts and automation
+- **PDF converter** — convert PDF pages to numbered PNG images with the `pdf` subcommand
 - **Single binary** — web assets embedded via `go:embed`, no separate file serving
 - **Rate limit handling** — quota errors surface as a friendly message instead of a raw API error
+
+## Documentation
+
+- [CLI reference](docs/cli.md) — all subcommands, flags, and examples
+- [API reference](docs/api.md) — HTTP endpoints, request/response schemas, and curl examples
 
 ## Setup
 
@@ -32,9 +54,28 @@ go build -o vocalize .
 # Open http://localhost:8080
 ```
 
-Choose a **model** and **voice** from the dropdowns, type your text, and hit **Synthesize**. Download the result with the **Download** button. The activity feed shows the word count and time taken for each synthesis.
+Choose a **model** and **voice** from the dropdowns, type your text, and hit **Synthesize**. Download the result with the **Download** button.
+
+To use OCR, drop or browse an image in the **Image OCR** card at the top. The extracted text appears in a copyable box — click **Synthesize** to convert it to speech.
 
 Flags: `--port 3000`, `--host 0.0.0.0`
+
+### One-shot CLI
+
+```sh
+# Synthesize text
+./vocalize speak "Hello, world!"
+./vocalize speak --voice Puck --export hello.opus "Hello, world!"
+
+# OCR — extract text from an image
+./vocalize ocr screenshot.png
+
+# OCR then synthesize
+./vocalize ocr --speak invoice.jpg
+./vocalize ocr --speak --export invoice.opus invoice.jpg
+```
+
+See [docs/cli.md](docs/cli.md) for the full flag reference.
 
 ### Interactive TUI
 
@@ -42,7 +83,7 @@ Flags: `--port 3000`, `--host 0.0.0.0`
 ./vocalize
 ```
 
-Press **Enter** on an empty prompt to open the command menu. Navigate with **↑ ↓**, select with **Enter**, dismiss with **Esc**. Use **↑ ↓** while typing to scroll the history.
+Press **Enter** on an empty prompt to open the command menu. Navigate with **↑ ↓**, select with **Enter**, dismiss with **Esc**.
 
 | Command          | Description              |
 | ---------------- | ------------------------ |
@@ -55,39 +96,26 @@ Press **Enter** on an empty prompt to open the command menu. Navigate with **↑
 | `help`           | List commands            |
 | `q` / `Ctrl+C`   | Quit                     |
 
-### One-shot CLI
+## API
 
-```sh
-./vocalize speak "Hello, world!"
+```
+POST /api/speak   { "text": "...", "voice": "Kore", "model": "..." }
+                  → { "opus": "<base64 Ogg Opus>" }
 
-# Choose a voice
-./vocalize speak --voice Puck "Hello, world!"
+POST /api/ocr     multipart/form-data  file=<image>
+                  → { "text": "..." }
 
-# Choose a TTS model
-./vocalize speak --model gemini-2.5-pro-preview-tts "Hello, world!"
-
-# Save to file (no playback)
-./vocalize speak --export hello.opus "Hello, world!"
-
-# Save and play
-./vocalize speak --export hello.opus --play "Hello, world!"
+GET  /api/voices  → { "voices": [...], "default": "Kore" }
+GET  /api/models  → { "models": [...], "default": "..." }
 ```
 
-### PDF to Images
-
-```sh
-# Convert each page to a PNG, output to ./report/ (named by page number)
-./vocalize pdf report.pdf
-
-# Specify output directory
-./vocalize pdf report.pdf --output /tmp/pages
-```
+See [docs/api.md](docs/api.md) for the full reference with curl examples.
 
 ## Models
 
 | Model                          | Notes            |
 | ------------------------------ | ---------------- |
-| `gemini-2.5-flash-preview-tts` | Default — fast   |
+| `gemini-2.5-flash-preview-tts` | Fast             |
 | `gemini-2.5-pro-preview-tts`   | Higher quality   |
 | `gemini-3.1-flash-tts-preview` | Latest preview   |
 
@@ -128,30 +156,17 @@ Press **Enter** on an empty prompt to open the command menu. Navigate with **↑
 ```
 ├── main.go                    # Entry point
 ├── embed.go                   # Embeds web/ into binary
-├── cmd/                       # CLI commands (root, speak, serve)
+├── cmd/                       # CLI commands (root, speak, serve, ocr, pdf)
+├── docs/                      # API and CLI documentation
 ├── internal/
 │   ├── config/                # Env/config loading and validation
 │   ├── gemini/                # Gemini TTS client + rate-limit detection
 │   ├── audio/                 # Opus encoder (Ogg container), platform audio player
 │   ├── tui/                   # Bubble Tea TUI (model, view, update)
+│   ├── ocr/                   # Tesseract OCR wrapper
 │   ├── pdf/                   # PDF-to-image converter (go-fitz/MuPDF)
 │   └── server/                # HTTP server + REST handlers
 └── web/                       # Embedded frontend (HTML/CSS/JS)
-```
-
-## API
-
-```
-POST /api/speak
-  Body:     { "text": "...", "voice": "Kore", "model": "gemini-2.5-flash-preview-tts" }
-  Response: { "opus": "<base64 Ogg Opus>" }
-  Errors:   429 on rate limit, 400 on invalid voice/model
-
-GET /api/voices
-  Response: { "voices": [...], "default": "Kore" }
-
-GET /api/models
-  Response: { "models": [...], "default": "gemini-2.5-flash-preview-tts" }
 ```
 
 ## Requirements
@@ -159,6 +174,7 @@ GET /api/models
 - Go 1.22+
 - `libopus` and `libopusfile` (for building): `brew install opus opusfile` / `apt install libopus-dev libopusfile-dev`
 - `mupdf` (for PDF conversion): `brew install mupdf` / `apt install libmupdf-dev`
+- `tesseract` (for OCR): `brew install tesseract` / `apt install tesseract-ocr`
 - An Opus-capable audio player for the CLI/TUI `speak` and `export` commands: `mpv`, `ffplay`, or `vlc`
   - macOS: `brew install mpv`
   - Linux: `apt install mpv` or `apt install ffmpeg`

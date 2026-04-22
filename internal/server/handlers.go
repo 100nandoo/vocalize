@@ -3,11 +3,13 @@ package server
 import (
 	"encoding/base64"
 	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/100nandoo/vocalize/internal/audio"
 	"github.com/100nandoo/vocalize/internal/config"
 	"github.com/100nandoo/vocalize/internal/gemini"
+	"github.com/100nandoo/vocalize/internal/ocr"
 )
 
 type speakRequest struct {
@@ -107,6 +109,45 @@ func handleModels(cfg *config.Config) http.HandlerFunc {
 			Models:  config.ValidModels(),
 			Default: cfg.DefaultModel,
 		})
+	}
+}
+
+type ocrResponse struct {
+	Text string `json:"text"`
+}
+
+func handleOCR() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			writeJSON(w, http.StatusMethodNotAllowed, errResponse{"method not allowed"})
+			return
+		}
+
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			writeJSON(w, http.StatusBadRequest, errResponse{"invalid multipart form"})
+			return
+		}
+
+		file, _, err := r.FormFile("file")
+		if err != nil {
+			writeJSON(w, http.StatusBadRequest, errResponse{"file is required"})
+			return
+		}
+		defer file.Close()
+
+		imageBytes, err := io.ReadAll(file)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, errResponse{"read file: " + err.Error()})
+			return
+		}
+
+		text, err := ocr.ExtractText(imageBytes)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, errResponse{err.Error()})
+			return
+		}
+
+		writeJSON(w, http.StatusOK, ocrResponse{Text: text})
 	}
 }
 
