@@ -14,7 +14,8 @@ services:
       - VOCALIZE_CONFIG_DIR=/app/config
       - HOST=0.0.0.0
     env_file:
-      - .env
+      - path: .env
+        required: false
     volumes:
       - ./config:/app/config
       # Optional: mount web directory for development
