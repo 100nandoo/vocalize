@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/100nandoo/vocalize/internal/audio"
-	"github.com/100nandoo/vocalize/internal/config"
-	"github.com/100nandoo/vocalize/internal/gemini"
-	"github.com/100nandoo/vocalize/internal/pdf"
+	"github.com/100nandoo/inti/internal/audio"
+	"github.com/100nandoo/inti/internal/config"
+	"github.com/100nandoo/inti/internal/gemini"
+	"github.com/100nandoo/inti/internal/pdf"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -220,7 +220,7 @@ func (m model) handleCommand(raw string) (tea.Model, tea.Cmd) {
 			m.viewport.Height = m.viewportHeight(stateMenu)
 			return m, nil
 		}
-		path := fmt.Sprintf("vocalize-%d.wav", time.Now().Unix())
+		path := fmt.Sprintf("inti-%d.wav", time.Now().Unix())
 		if args != "" {
 			path = args
 		}

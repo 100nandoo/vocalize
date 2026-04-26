@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/100nandoo/vocalize/internal/pdf"
+	"github.com/100nandoo/inti/internal/pdf"
 	"github.com/spf13/cobra"
 )
 

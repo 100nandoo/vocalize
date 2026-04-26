@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/100nandoo/vocalize/internal/audio"
-	"github.com/100nandoo/vocalize/internal/config"
-	"github.com/100nandoo/vocalize/internal/gemini"
+	"github.com/100nandoo/inti/internal/audio"
+	"github.com/100nandoo/inti/internal/config"
+	"github.com/100nandoo/inti/internal/gemini"
 	"github.com/spf13/cobra"
 )
 

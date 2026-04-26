@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/100nandoo/vocalize/internal/summarizer"
+	"github.com/100nandoo/inti/internal/summarizer"
 	"github.com/spf13/cobra"
 )
 

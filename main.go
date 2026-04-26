@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/100nandoo/vocalize/cmd"
+	"github.com/100nandoo/inti/cmd"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-# Vocalize
+# Inti
 
 Text-to-speech powered by Google Gemini, with a modern web UI and an interactive terminal — all in a single Go binary.
 
@@ -47,7 +47,7 @@ cp .env.example .env
 ```
 
 ```sh
-go build -o vocalize .
+go build -o inti .
 ```
 
 ## Usage
@@ -55,7 +55,7 @@ go build -o vocalize .
 ### Web server
 
 ```sh
-./vocalize serve
+./inti serve
 # Open http://localhost:8282
 ```
 
@@ -71,19 +71,19 @@ Flags: `--port 3000`, `--host 0.0.0.0`
 
 ```sh
 # Synthesize text
-./vocalize speak "Hello, world!"
-./vocalize speak --voice Puck --export hello.opus "Hello, world!"
+./inti speak "Hello, world!"
+./inti speak --voice Puck --export hello.opus "Hello, world!"
 
 # Summarize text
-./vocalize summarize "Long article text..."
-./vocalize summarize --provider groq --api-key gsk_... "Long article text..."
+./inti summarize "Long article text..."
+./inti summarize --provider groq --api-key gsk_... "Long article text..."
 
 # OCR — extract text from an image
-./vocalize ocr screenshot.png
+./inti ocr screenshot.png
 
 # OCR then synthesize
-./vocalize ocr --speak invoice.jpg
-./vocalize ocr --speak --export invoice.opus invoice.jpg
+./inti ocr --speak invoice.jpg
+./inti ocr --speak --export invoice.opus invoice.jpg
 ```
 
 See [docs/cli.md](docs/cli.md) for the full flag reference.
@@ -91,7 +91,7 @@ See [docs/cli.md](docs/cli.md) for the full flag reference.
 ### Interactive TUI
 
 ```sh
-./vocalize
+./inti
 ```
 
 Press **Enter** on an empty prompt to open the command menu. Navigate with **↑ ↓**, select with **Enter**, dismiss with **Esc**.
@@ -124,7 +124,7 @@ GET  /api/voices             → { "voices": [...], "default": "Kore" }
 GET  /api/models             → { "models": [...], "default": "..." }
 
 GET    /api/admin/keys       → { "keys": [...] }
-POST   /api/admin/keys       { "name": "..." } → { "key": {...}, "raw": "voc_..." }
+POST   /api/admin/keys       { "name": "..." } → { "key": {...}, "raw": "inti_..." }
 DELETE /api/admin/keys/{id}  → 204
 ```
 
@@ -164,20 +164,20 @@ See [docs/api.md](docs/api.md) for the full reference with curl examples.
 
 ## Configuration
 
-| Variable                | Default                        | Description                                                    |
-| ----------------------- | ------------------------------ | -------------------------------------------------------------- |
-| `GEMINI_API_KEY`        | —                              | Required for TTS and Gemini summarization                      |
-| `VOCALIZE_MASTER_KEY`   | —                              | Master key for API authentication (recommended for public deployment) |
-| `DEFAULT_VOICE`         | `Kore`                         | Default voice name                                             |
-| `DEFAULT_MODEL`         | `gemini-3.1-flash-tts-preview` | Default TTS model                                              |
-| `PORT`                  | `8282`                         | Web server port                                                |
-| `HOST`                  | `127.0.0.1`                    | Web server bind address                                        |
-| `VOCALIZE_CONFIG_DIR`   | OS default                     | Override config/key storage directory                          |
-| `SUMMARIZER_PROVIDER`   | auto-detected                  | Summarizer provider: `gemini`, `groq`, or `openrouter`         |
-| `GROQ_API_KEY`          | —                              | Required when provider is `groq`                               |
-| `GROQ_MODEL`            | `llama-3.3-70b-versatile`      | Groq model to use                                              |
-| `OPENROUTER_API_KEY`    | —                              | Required when provider is `openrouter`                         |
-| `OPENROUTER_MODEL`      | `google/gemma-3-27b-it:free`   | OpenRouter model to use (`:free` suffix = no credits consumed) |
+| Variable              | Default                        | Description                                                    |
+| --------------------- | ------------------------------ | -------------------------------------------------------------- |
+| `GEMINI_API_KEY`      | —                              | Required for TTS and Gemini summarization                      |
+| `INTI_MASTER_KEY`     | —                              | Master key for API authentication (recommended for public deployment) |
+| `DEFAULT_VOICE`       | `Kore`                         | Default voice name                                             |
+| `DEFAULT_MODEL`       | `gemini-3.1-flash-tts-preview` | Default TTS model                                              |
+| `PORT`                | `8282`                         | Web server port                                                |
+| `HOST`                | `127.0.0.1`                    | Web server bind address                                        |
+| `INTI_CONFIG_DIR`     | OS default                     | Override config/key storage directory                          |
+| `SUMMARIZER_PROVIDER` | auto-detected                  | Summarizer provider: `gemini`, `groq`, or `openrouter`         |
+| `GROQ_API_KEY`        | —                              | Required when provider is `groq`                               |
+| `GROQ_MODEL`          | `llama-3.3-70b-versatile`      | Groq model to use                                              |
+| `OPENROUTER_API_KEY`  | —                              | Required when provider is `openrouter`                         |
+| `OPENROUTER_MODEL`    | `google/gemma-3-27b-it:free`   | OpenRouter model to use (`:free` suffix = no credits consumed) |
 
 `SUMMARIZER_PROVIDER` is auto-detected if not set: uses `gemini` if `GEMINI_API_KEY` is present, then `groq` if `GROQ_API_KEY` is present, then `openrouter` if `OPENROUTER_API_KEY` is present.
 
@@ -185,7 +185,7 @@ See [docs/config.md](docs/config.md) for the full reference including config fil
 
 ## Deploying publicly
 
-When exposing Vocalize via Cloudflare Tunnel or any public URL, set a master key to lock down the API:
+When exposing Inti via Cloudflare Tunnel or any public URL, set a master key to lock down the API:
 
 1. Generate a secret:
    ```sh
@@ -195,14 +195,14 @@ When exposing Vocalize via Cloudflare Tunnel or any public URL, set a master key
    ```
 2. Add it to `.env`:
    ```sh
-   VOCALIZE_MASTER_KEY=<generated secret>
+   INTI_MASTER_KEY=<generated secret>
    HOST=0.0.0.0
    ```
 3. Open `http://your-host/api-keys.html`, paste the master key, and create per-user API keys to share with others.
 
 All API requests must then include the key in the header:
 ```sh
-curl -s http://your-host/api/voices -H 'X-API-Key: voc_...'
+curl -s http://your-host/api/voices -H 'X-API-Key: inti_...'
 ```
 
 The web UI stores the key in `localStorage` and sends it automatically.

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/100nandoo/vocalize/internal/config"
-	"github.com/100nandoo/vocalize/internal/gemini"
+	"github.com/100nandoo/inti/internal/config"
+	"github.com/100nandoo/inti/internal/gemini"
 )
 
 // Summarizer is implemented by any AI backend that can summarize text.

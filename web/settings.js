@@ -1,5 +1,5 @@
-const STORAGE_KEY = 'vocalize:summarizer';
-const API_KEY_STORAGE = 'vocalize:apiKey';
+const STORAGE_KEY = 'inti:summarizer';
+const API_KEY_STORAGE = 'inti:apiKey';
 
 function withAPIKey(headers = {}) {
   const k = localStorage.getItem(API_KEY_STORAGE) || '';

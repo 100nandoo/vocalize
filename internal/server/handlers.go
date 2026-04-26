@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/100nandoo/vocalize/internal/audio"
-	"github.com/100nandoo/vocalize/internal/config"
-	"github.com/100nandoo/vocalize/internal/gemini"
-	"github.com/100nandoo/vocalize/internal/ocr"
-	"github.com/100nandoo/vocalize/internal/summarizer"
+	"github.com/100nandoo/inti/internal/audio"
+	"github.com/100nandoo/inti/internal/config"
+	"github.com/100nandoo/inti/internal/gemini"
+	"github.com/100nandoo/inti/internal/ocr"
+	"github.com/100nandoo/inti/internal/summarizer"
 )
 
 type speakRequest struct {

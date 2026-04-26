@@ -1,4 +1,4 @@
-const API_KEY_STORAGE = 'vocalize:apiKey';
+const API_KEY_STORAGE = 'inti:apiKey';
 
 function getStoredKey() {
   return localStorage.getItem(API_KEY_STORAGE) || '';

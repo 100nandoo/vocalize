@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  vocalize:
+  inti:
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,7 +11,7 @@ services:
       # Load from .env file
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - LOG_LEVEL=${LOG_LEVEL:-info}
-      - VOCALIZE_CONFIG_DIR=/app/config
+      - INTI_CONFIG_DIR=/app/config
       - HOST=0.0.0.0
     env_file:
       - path: .env

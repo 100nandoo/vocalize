@@ -33,8 +33,8 @@ func (c *OpenRouterClient) Summarize(ctx context.Context, text, instruction stri
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
-	req.Header.Set("HTTP-Referer", "vocalize")
-	req.Header.Set("X-Title", "Vocalize")
+	req.Header.Set("HTTP-Referer", "inti")
+	req.Header.Set("X-Title", "Inti")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

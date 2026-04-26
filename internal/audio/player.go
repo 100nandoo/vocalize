@@ -16,7 +16,7 @@ func Play(pcm []byte) error {
 		return err
 	}
 
-	tmp, err := os.CreateTemp("", "vocalize-*.opus")
+	tmp, err := os.CreateTemp("", "inti-*.opus")
 	if err != nil {
 		return fmt.Errorf("create temp file: %w", err)
 	}

@@ -249,8 +249,8 @@ loadModels();
 
 // --- Summarizer settings (stored in localStorage by settings.html) ---
 
-const STORAGE_KEY = 'vocalize:summarizer';
-const API_KEY_STORAGE = 'vocalize:apiKey';
+const STORAGE_KEY = 'inti:summarizer';
+const API_KEY_STORAGE = 'inti:apiKey';
 
 function withAPIKey(headers = {}) {
   const k = localStorage.getItem(API_KEY_STORAGE) || '';
@@ -421,7 +421,7 @@ submitBtn.addEventListener('click', async () => {
     const url = URL.createObjectURL(lastWavBlob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `vocalize-${Date.now()}.opus`;
+    a.download = `inti-${Date.now()}.opus`;
     a.click();
     URL.revokeObjectURL(url);
     addFeed('ok', 'Downloaded', 'Opus file saved to your downloads folder');

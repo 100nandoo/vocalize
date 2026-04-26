@@ -34,7 +34,7 @@ func (m model) View() string {
 }
 
 func (m model) renderHeader() string {
-	return titleStyle.Render("◈ VOCALIZE-GO") +
+	return titleStyle.Render("◈ INTI") +
 		dimStyle.Render(fmt.Sprintf("  voice: %s", m.currentVoice))
 }
 

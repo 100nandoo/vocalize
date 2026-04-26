@@ -2,7 +2,6 @@
 
 ## High
 
-- Rename vocalize to inti
 - combine extension repo with this
 - Add button Download summary result
 - Load AI api keys from config
@@ -20,3 +19,7 @@
 
 - Add Mistral model
 - Add themes preset
+
+## Done
+
+- Rename vocalize to inti

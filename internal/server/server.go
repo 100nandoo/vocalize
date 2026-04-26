@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/100nandoo/vocalize/internal/config"
-	"github.com/100nandoo/vocalize/internal/gemini"
-	"github.com/100nandoo/vocalize/internal/summarizer"
+	"github.com/100nandoo/inti/internal/config"
+	"github.com/100nandoo/inti/internal/gemini"
+	"github.com/100nandoo/inti/internal/summarizer"
 )
 
 type activeSumConfig struct {
@@ -39,7 +39,7 @@ func loadActiveConfig(cfg *config.Config) *activeSumConfig {
 		APIKey:   apiKeyForProvider(cfg.SummarizerProvider, cfg),
 	}
 	fileMu.Lock()
-	vc := readVocalizeConfigUnlocked()
+	vc := readIntiConfigUnlocked()
 	fileMu.Unlock()
 	if vc.Summarizer.Provider != "" {
 		asc.Provider = vc.Summarizer.Provider
@@ -52,13 +52,13 @@ func loadActiveConfig(cfg *config.Config) *activeSumConfig {
 func saveActiveConfig(provider, model, apiKey string) error {
 	fileMu.Lock()
 	defer fileMu.Unlock()
-	vc := readVocalizeConfigUnlocked()
+	vc := readIntiConfigUnlocked()
 	vc.Summarizer = summarizerSection{
 		Provider: provider,
 		Model:    model,
 		APIKey:   apiKey,
 	}
-	return writeVocalizeConfigUnlocked(vc)
+	return writeIntiConfigUnlocked(vc)
 }
 
 func apiKeyForProvider(provider string, cfg *config.Config) string {
@@ -73,6 +73,8 @@ func apiKeyForProvider(provider string, cfg *config.Config) string {
 }
 
 func Start(cfg *config.Config, webFS embed.FS) error {
+	migrateOldConfigDir()
+
 	var g *gemini.Client
 	if cfg.GeminiAPIKey != "" {
 		var err error

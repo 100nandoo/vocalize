@@ -1,6 +1,6 @@
 # CLI Reference
 
-All subcommands share the same binary: `./vocalize`.
+All subcommands share the same binary: `./inti`.
 
 ## Table of Contents
 
@@ -17,8 +17,8 @@ All subcommands share the same binary: `./vocalize`.
 ## Global
 
 ```sh
-./vocalize --help
-./vocalize [command] --help
+./inti --help
+./inti [command] --help
 ```
 
 ---
@@ -26,7 +26,7 @@ All subcommands share the same binary: `./vocalize`.
 ## `speak` — Synthesize text
 
 ```sh
-./vocalize speak [flags] <text>
+./inti speak [flags] <text>
 ```
 
 Synthesizes the given text and plays it. Exits when playback finishes. Requires `GEMINI_API_KEY`.
@@ -42,19 +42,19 @@ Synthesizes the given text and plays it. Exits when playback finishes. Requires 
 
 ```sh
 # Basic
-./vocalize speak "Hello, world!"
+./inti speak "Hello, world!"
 
 # Choose a voice
-./vocalize speak --voice Puck "Hello, world!"
+./inti speak --voice Puck "Hello, world!"
 
 # Choose a model
-./vocalize speak --model gemini-2.5-pro-preview-tts "Hello, world!"
+./inti speak --model gemini-2.5-pro-preview-tts "Hello, world!"
 
 # Save to file (no playback)
-./vocalize speak --export hello.opus "Hello, world!"
+./inti speak --export hello.opus "Hello, world!"
 
 # Save and play
-./vocalize speak --export hello.opus --play "Hello, world!"
+./inti speak --export hello.opus --play "Hello, world!"
 ```
 
 ---
@@ -62,7 +62,7 @@ Synthesizes the given text and plays it. Exits when playback finishes. Requires 
 ## `summarize` — Summarize text
 
 ```sh
-./vocalize summarize [flags] <text>
+./inti summarize [flags] <text>
 ```
 
 Summarizes the given text using a configured AI provider and prints the result to stdout. Supports Gemini, Groq (free tier), and OpenRouter (free models). Does **not** require `GEMINI_API_KEY` unless the provider is set to `gemini`.
@@ -79,19 +79,19 @@ The provider is auto-detected from env vars if `--provider` is not set: `GEMINI_
 
 ```sh
 # Using the server-configured provider
-./vocalize summarize "Go is a statically typed, compiled language..."
+./inti summarize "Go is a statically typed, compiled language..."
 
 # Groq (free tier)
-GROQ_API_KEY=gsk_... ./vocalize summarize "Go is a statically typed language..."
+GROQ_API_KEY=gsk_... ./inti summarize "Go is a statically typed language..."
 
 # OpenRouter (free models)
-OPENROUTER_API_KEY=sk-or-... ./vocalize summarize "Go is a statically typed language..."
+OPENROUTER_API_KEY=sk-or-... ./inti summarize "Go is a statically typed language..."
 
 # Override provider and key inline
-./vocalize summarize --provider groq --api-key gsk_... "Long article text..."
+./inti summarize --provider groq --api-key gsk_... "Long article text..."
 
 # Custom instruction
-./vocalize summarize --instruction "Summarize in one sentence." "Long article text..."
+./inti summarize --instruction "Summarize in one sentence." "Long article text..."
 ```
 
 ---
@@ -99,7 +99,7 @@ OPENROUTER_API_KEY=sk-or-... ./vocalize summarize "Go is a statically typed lang
 ## `ocr` — Extract text from an image
 
 ```sh
-./vocalize ocr [flags] <image-path>
+./inti ocr [flags] <image-path>
 ```
 
 Runs Tesseract OCR on the image and prints the extracted text. Supports PNG, JPEG, WebP, TIFF, and any format Tesseract accepts.
@@ -118,16 +118,16 @@ Optionally synthesizes the extracted text with TTS using `--speak`.
 
 ```sh
 # Extract and print text
-./vocalize ocr screenshot.png
+./inti ocr screenshot.png
 
 # Extract then speak
-./vocalize ocr --speak invoice.jpg
+./inti ocr --speak invoice.jpg
 
 # Extract, speak, and save audio
-./vocalize ocr --speak --export invoice.opus invoice.jpg
+./inti ocr --speak --export invoice.opus invoice.jpg
 
 # Extract with a specific voice
-./vocalize ocr --speak --voice Fenrir notes.png
+./inti ocr --speak --voice Fenrir notes.png
 ```
 
 ---
@@ -135,7 +135,7 @@ Optionally synthesizes the extracted text with TTS using `--speak`.
 ## `serve` — Start the web server
 
 ```sh
-./vocalize serve [flags]
+./inti serve [flags]
 ```
 
 Starts an HTTP server serving the web UI at `http://localhost:8282`. `GEMINI_API_KEY` is only required if you use TTS; summarization works with Groq or OpenRouter keys alone.
@@ -148,12 +148,12 @@ Starts an HTTP server serving the web UI at `http://localhost:8282`. `GEMINI_API
 **Examples**
 
 ```sh
-./vocalize serve
-./vocalize serve --port 3000
-./vocalize serve --port 3000 --host 0.0.0.0
+./inti serve
+./inti serve --port 3000
+./inti serve --port 3000 --host 0.0.0.0
 
 # Summarize-only mode (no TTS)
-GROQ_API_KEY=gsk_... ./vocalize serve
+GROQ_API_KEY=gsk_... ./inti serve
 ```
 
 ---
@@ -161,7 +161,7 @@ GROQ_API_KEY=gsk_... ./vocalize serve
 ## `pdf` — Convert PDF to images
 
 ```sh
-./vocalize pdf [flags] <pdf-path>
+./inti pdf [flags] <pdf-path>
 ```
 
 Converts each page of the PDF to a numbered PNG image.
@@ -174,20 +174,20 @@ Converts each page of the PDF to a numbered PNG image.
 
 ```sh
 # Convert to current directory
-./vocalize pdf report.pdf
+./inti pdf report.pdf
 
 # Specify output directory
-./vocalize pdf report.pdf --output /tmp/pages
+./inti pdf report.pdf --output /tmp/pages
 ```
 
 ---
 
 ## Interactive TUI
 
-Running `./vocalize` without any subcommand launches the Bubble Tea terminal UI. Requires `GEMINI_API_KEY`.
+Running `./inti` without any subcommand launches the Bubble Tea terminal UI. Requires `GEMINI_API_KEY`.
 
 ```sh
-./vocalize
+./inti
 ```
 
 Press **Enter** on an empty prompt to open the command menu. Navigate with **↑ ↓**, select with **Enter**, dismiss with **Esc**. Use **↑ ↓** while typing to scroll the history.

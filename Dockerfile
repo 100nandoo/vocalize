@@ -21,7 +21,7 @@ RUN go mod download
 COPY . .
 
 # Build the binary with CGo enabled
-RUN CGO_ENABLED=1 GOOS=linux go build -o vocalize .
+RUN CGO_ENABLED=1 GOOS=linux go build -o inti .
 
 # Runtime stage
 FROM debian:bookworm-slim
@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy binary from builder
-COPY --from=builder /app/vocalize .
+COPY --from=builder /app/inti .
 
 # Copy web assets
 COPY --from=builder /app/web ./web
@@ -48,4 +48,4 @@ COPY --from=builder /app/web ./web
 EXPOSE 8282
 
 # Run the application
-CMD ["./vocalize", "serve"]
+CMD ["./inti", "serve"]

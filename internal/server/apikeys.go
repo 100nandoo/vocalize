@@ -20,7 +20,7 @@ func generateKey() (string, error) {
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
-	return "voc_" + hex.EncodeToString(b), nil
+	return "inti_" + hex.EncodeToString(b), nil
 }
 
 func generateID() (string, error) {
@@ -128,14 +128,14 @@ func (s *apiKeyStore) save() error {
 
 	fileMu.Lock()
 	defer fileMu.Unlock()
-	vc := readVocalizeConfigUnlocked()
+	vc := readIntiConfigUnlocked()
 	vc.APIKeys = keys
-	return writeVocalizeConfigUnlocked(vc)
+	return writeIntiConfigUnlocked(vc)
 }
 
 func loadAPIKeyStore() *apiKeyStore {
 	fileMu.Lock()
-	vc := readVocalizeConfigUnlocked()
+	vc := readIntiConfigUnlocked()
 	fileMu.Unlock()
 	return &apiKeyStore{keys: vc.APIKeys}
 }

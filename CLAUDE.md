@@ -9,19 +9,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 brew install opus opusfile mpv
 
 # Build
-go build -o vocalize .
+go build -o inti .
 
 # Run web server
-./vocalize serve                # http://localhost:8282
-./vocalize serve --port 3000
+./inti serve                # http://localhost:8282
+./inti serve --port 3000
 
 # Run interactive TUI
-./vocalize
+./inti
 
 # One-shot CLI
-./vocalize speak "Hello, world!"
-./vocalize speak --voice Puck --model gemini-2.5-pro-preview-tts "Hello"
-./vocalize speak --export out.opus --play "Hello"
+./inti speak "Hello, world!"
+./inti speak --voice Puck --model gemini-2.5-pro-preview-tts "Hello"
+./inti speak --export out.opus --play "Hello"
 ```
 
 ## Environment

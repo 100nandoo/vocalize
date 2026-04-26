@@ -101,7 +101,7 @@ func EncodePCMToOpus(pcm []byte, sampleRate int) ([]byte, error) {
 	// OpusTags comment header
 	var tags bytes.Buffer
 	tags.WriteString("OpusTags")
-	vendor := "vocalize"
+	vendor := "inti"
 	binary.Write(&tags, binary.LittleEndian, uint32(len(vendor)))
 	tags.WriteString(vendor)
 	binary.Write(&tags, binary.LittleEndian, uint32(0)) // no user comments

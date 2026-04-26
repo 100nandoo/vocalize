@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/100nandoo/vocalize/internal/server"
+	"github.com/100nandoo/inti/internal/server"
 	"github.com/spf13/cobra"
 )
 

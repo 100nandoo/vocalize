@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/100nandoo/vocalize/internal/config"
-	"github.com/100nandoo/vocalize/internal/gemini"
+	"github.com/100nandoo/inti/internal/config"
+	"github.com/100nandoo/inti/internal/gemini"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -123,7 +123,7 @@ func newModel(cfg *config.Config, g *gemini.Client) model {
 	}
 
 	m.history = []logEntry{
-		{kind: kindSystem, content: "VOCALIZE-GO v1.0 — Gemini TTS", time: time.Now()},
+		{kind: kindSystem, content: "INTI v1.0 — Gemini TTS", time: time.Now()},
 		{kind: kindSystem, content: fmt.Sprintf("model: gemini-3.1-flash-tts-preview | voice: %s | 24kHz PCM-16", cfg.DefaultVoice), time: time.Now()},
 		{kind: kindSystem, content: "press enter to see available commands", time: time.Now()},
 	}

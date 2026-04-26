@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/100nandoo/vocalize/internal/config"
-	"github.com/100nandoo/vocalize/internal/gemini"
-	"github.com/100nandoo/vocalize/internal/tui"
+	"github.com/100nandoo/inti/internal/config"
+	"github.com/100nandoo/inti/internal/gemini"
+	"github.com/100nandoo/inti/internal/tui"
 	"github.com/spf13/cobra"
 )
 
 var cfg *config.Config
 
 var rootCmd = &cobra.Command{
-	Use:   "vocalize",
+	Use:   "inti",
 	Short: "Text-to-speech powered by Gemini",
-	Long:  "Vocalize converts text to speech using Google Gemini. Run without subcommands for interactive TUI.",
+	Long:  "Inti converts text to speech using Google Gemini. Run without subcommands for interactive TUI.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if cfg.GeminiAPIKey == "" {
 			return fmt.Errorf("GEMINI_API_KEY is required for TTS — set it in your environment or .env file")

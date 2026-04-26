@@ -12,7 +12,7 @@ import (
 // ExtractText runs Tesseract OCR on imageBytes and returns cleaned extracted text.
 // Requires the tesseract binary to be installed (brew install tesseract).
 func ExtractText(imageBytes []byte) (string, error) {
-	tmp, err := os.CreateTemp("", "vocalize-ocr-*")
+	tmp, err := os.CreateTemp("", "inti-ocr-*")
 	if err != nil {
 		return "", fmt.Errorf("create temp file: %w", err)
 	}

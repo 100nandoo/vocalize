@@ -1,4 +1,4 @@
-module github.com/100nandoo/vocalize
+module github.com/100nandoo/inti
 
 go 1.23.0
 
