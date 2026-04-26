@@ -2,12 +2,9 @@ package server
 
 import (
 	"embed"
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"net/http"
-	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/100nandoo/vocalize/internal/config"
@@ -36,52 +33,32 @@ func (a *activeSumConfig) set(provider, model, apiKey string) {
 	a.APIKey = apiKey
 }
 
-type persistedSumConfig struct {
-	Provider string `json:"provider"`
-	Model    string `json:"model"`
-	APIKey   string `json:"apiKey"`
-}
-
-func configFilePath() string {
-	if dir := os.Getenv("VOCALIZE_CONFIG_DIR"); dir != "" {
-		return filepath.Join(dir, "config.json")
-	}
-	base, err := os.UserConfigDir()
-	if err != nil {
-		return "config.json"
-	}
-	return filepath.Join(base, "vocalize", "config.json")
-}
-
 func loadActiveConfig(cfg *config.Config) *activeSumConfig {
 	asc := &activeSumConfig{
 		Provider: cfg.SummarizerProvider,
 		APIKey:   apiKeyForProvider(cfg.SummarizerProvider, cfg),
 	}
-	data, err := os.ReadFile(configFilePath())
-	if err == nil {
-		var p persistedSumConfig
-		if json.Unmarshal(data, &p) == nil {
-			if p.Provider != "" {
-				asc.Provider = p.Provider
-				asc.APIKey = p.APIKey
-			}
-			asc.Model = p.Model
-		}
+	fileMu.Lock()
+	vc := readVocalizeConfigUnlocked()
+	fileMu.Unlock()
+	if vc.Summarizer.Provider != "" {
+		asc.Provider = vc.Summarizer.Provider
+		asc.APIKey = vc.Summarizer.APIKey
 	}
+	asc.Model = vc.Summarizer.Model
 	return asc
 }
 
 func saveActiveConfig(provider, model, apiKey string) error {
-	path := configFilePath()
-	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
-		return err
+	fileMu.Lock()
+	defer fileMu.Unlock()
+	vc := readVocalizeConfigUnlocked()
+	vc.Summarizer = summarizerSection{
+		Provider: provider,
+		Model:    model,
+		APIKey:   apiKey,
 	}
-	data, err := json.Marshal(persistedSumConfig{Provider: provider, Model: model, APIKey: apiKey})
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(path, data, 0600)
+	return writeVocalizeConfigUnlocked(vc)
 }
 
 func apiKeyForProvider(provider string, cfg *config.Config) string {

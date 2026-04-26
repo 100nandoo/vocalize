@@ -4,36 +4,15 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
-	"os"
-	"path/filepath"
 	"sync"
 	"time"
 )
 
-type storedKey struct {
-	ID         string     `json:"id"`
-	Name       string     `json:"name"`
-	Prefix     string     `json:"prefix"`
-	Hash       string     `json:"hash"`
-	CreatedAt  time.Time  `json:"createdAt"`
-	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
-}
+// storedKey is defined in config_store.go (shared with TOML serialisation).
 
 type apiKeyStore struct {
 	mu   sync.RWMutex
 	keys []storedKey
-}
-
-func apiKeysFilePath() string {
-	if dir := os.Getenv("VOCALIZE_CONFIG_DIR"); dir != "" {
-		return filepath.Join(dir, "api_keys.json")
-	}
-	base, err := os.UserConfigDir()
-	if err != nil {
-		return "api_keys.json"
-	}
-	return filepath.Join(base, "vocalize", "api_keys.json")
 }
 
 func generateKey() (string, error) {
@@ -143,28 +122,20 @@ func (s *apiKeyStore) touchLastUsed(id string) {
 
 func (s *apiKeyStore) save() error {
 	s.mu.RLock()
-	data, err := json.Marshal(s.keys)
+	keys := make([]storedKey, len(s.keys))
+	copy(keys, s.keys)
 	s.mu.RUnlock()
-	if err != nil {
-		return err
-	}
-	path := apiKeysFilePath()
-	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
-		return err
-	}
-	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, data, 0600); err != nil {
-		return err
-	}
-	return os.Rename(tmp, path)
+
+	fileMu.Lock()
+	defer fileMu.Unlock()
+	vc := readVocalizeConfigUnlocked()
+	vc.APIKeys = keys
+	return writeVocalizeConfigUnlocked(vc)
 }
 
 func loadAPIKeyStore() *apiKeyStore {
-	store := &apiKeyStore{}
-	data, err := os.ReadFile(apiKeysFilePath())
-	if err != nil {
-		return store
-	}
-	_ = json.Unmarshal(data, &store.keys)
-	return store
+	fileMu.Lock()
+	vc := readVocalizeConfigUnlocked()
+	fileMu.Unlock()
+	return &apiKeyStore{keys: vc.APIKeys}
 }
