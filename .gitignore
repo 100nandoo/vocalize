@@ -36,6 +36,7 @@ build/
 dist/
 tmp/
 .tmp/
+.codebase-memory/
 *.wav
 *.mp3
 *.opus
