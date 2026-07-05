@@ -11,7 +11,7 @@ import {
 test('buildMainWorkspaceProviderOptions keeps server default and filters providers by saved keys', () => {
   const options = buildMainWorkspaceProviderOptions({
     provider: 'groq',
-    model: 'llama-3.3-70b-versatile',
+    model: 'openai/gpt-oss-120b',
     keys: {
       gemini: '',
       groq: 'gsk_live',
@@ -35,7 +35,7 @@ test('loadMainWorkspaceSummarizerConfig preserves the backend response contract'
       assert.equal(String(url), 'http://localhost:8282/api/summarizer-config?key=secret');
       return Response.json({
         provider: 'groq',
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         keys: {
           gemini: '',
           groq: 'gsk_saved',
@@ -46,7 +46,7 @@ test('loadMainWorkspaceSummarizerConfig preserves the backend response contract'
   });
 
   assert.equal(result.provider, 'groq');
-  assert.equal(result.model, 'llama-3.3-70b-versatile');
+  assert.equal(result.model, 'openai/gpt-oss-120b');
   assert.deepEqual(result.keys, {
     gemini: '',
     groq: 'gsk_saved',
@@ -91,7 +91,7 @@ test('loadMainWorkspaceModelOptions keeps model selection on supported providers
     fetchImpl: async (url) => {
       assert.equal(String(url), '/summarizer-models/groq.json');
       return Response.json([
-        { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+        { value: 'openai/gpt-oss-120b', label: 'gpt-oss-120b' },
         { value: 'mixtral-scout', label: 'Mixtral Scout' },
       ]);
     },
@@ -100,7 +100,7 @@ test('loadMainWorkspaceModelOptions keeps model selection on supported providers
   assert.equal(loaded.hidden, false);
   assert.equal(loaded.selectedModel, 'mixtral-scout');
   assert.deepEqual(loaded.options.map((option) => option.value), [
-    'llama-3.3-70b-versatile',
+    'openai/gpt-oss-120b',
     'mixtral-scout',
   ]);
 

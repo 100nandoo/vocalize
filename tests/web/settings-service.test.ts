@@ -48,7 +48,7 @@ test('saveSettings preserves the current backend contracts', async () => {
   const result = await saveSettings({
     apiURL,
     provider: 'groq',
-    model: 'llama-3.3-70b-versatile',
+    model: 'openai/gpt-oss-120b',
     keys: { gemini: '', groq: 'gsk_saved', openrouter: '' },
     appearanceConfig: {
       theme: 'dark',
@@ -66,7 +66,7 @@ test('saveSettings preserves the current backend contracts', async () => {
   assert.deepEqual(bodies, [
     {
       provider: 'groq',
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       keys: { gemini: '', groq: 'gsk_saved', openrouter: '' },
     },
     {
@@ -76,7 +76,7 @@ test('saveSettings preserves the current backend contracts', async () => {
       summaryPromotionBehavior: 'replace',
     },
   ]);
-  assert.equal(result.summarizerConfig.model, 'llama-3.3-70b-versatile');
+  assert.equal(result.summarizerConfig.model, 'openai/gpt-oss-120b');
   assert.equal(result.appearanceConfig.summaryDownloadFormat, 'txt');
 });
 

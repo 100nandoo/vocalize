@@ -230,7 +230,7 @@ func Load() (*Config, error) {
 		}
 	}
 
-	groqModel := "llama-3.3-70b-versatile"
+	groqModel := "openai/gpt-oss-120b"
 	if m := os.Getenv("GROQ_MODEL"); m != "" {
 		groqModel = m
 	}

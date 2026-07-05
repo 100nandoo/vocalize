@@ -29,13 +29,13 @@ func TestFormatTelegramSummaryResultIncludesProviderAndModel(t *testing.T) {
 	got := formatTelegramSummaryResult(textprocessing.SummaryResult{
 		Summary:  "# Title\n\nCondensed text",
 		Provider: "groq",
-		Model:    "llama-3.3-70b-versatile",
+		Model:    "openai/gpt-oss-120b",
 	})
 
 	wantParts := []string{
 		`*Title*`,
 		`Condensed text`,
-		`_Provider: groq • Model: llama\-3\.3\-70b\-versatile_`,
+		`_Provider: groq • Model: openai/gpt\-oss\-120b_`,
 	}
 	for _, want := range wantParts {
 		if !strings.Contains(got, want) {

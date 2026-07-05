@@ -222,7 +222,7 @@ Gemini voices:
 | `INTI_CONFIG_DIR`     | OS default                     | Override config/key storage directory                          |
 | `SUMMARIZER_PROVIDER` | auto-detected                  | Summarizer provider: `gemini`, `groq`, or `openrouter`         |
 | `GROQ_API_KEY`        | —                              | Required when provider is `groq`                               |
-| `GROQ_MODEL`          | `llama-3.3-70b-versatile`      | Groq model to use                                              |
+| `GROQ_MODEL`          | `openai/gpt-oss-120b`          | Groq model to use                                              |
 | `OPENROUTER_API_KEY`  | —                              | Required when provider is `openrouter`                         |
 | `OPENROUTER_MODEL`    | `openrouter/free`              | OpenRouter model/router to use; `openrouter/free` tracks currently available free models |
 

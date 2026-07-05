@@ -45,7 +45,7 @@ test('settings page loads and saves through the current backend APIs', async (t)
     if (method === 'GET' && urlText === 'http://localhost:8282/api/summarizer-config?key=main-secret') {
       return Response.json({
         provider: 'groq',
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         keys: {
           gemini: '',
           groq: 'gsk_existing',
@@ -65,7 +65,7 @@ test('settings page loads and saves through the current backend APIs', async (t)
 
     if (method === 'GET' && urlText === '/summarizer-models/groq.json') {
       return Response.json([
-        { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+        { value: 'openai/gpt-oss-120b', label: 'gpt-oss-120b' },
         { value: 'mixtral-scout', label: 'Mixtral Scout' },
       ]);
     }
@@ -92,7 +92,7 @@ test('settings page loads and saves through the current backend APIs', async (t)
   assert.match(document.body.textContent ?? '', /Visual Theme/);
   assert.match(document.body.textContent ?? '', /Providers/);
   assert.equal(requiredElement<HTMLSelectElement>('sum-provider-select').value, 'groq');
-  assert.equal(requiredElement<HTMLSelectElement>('sum-model-select').value, 'llama-3.3-70b-versatile');
+  assert.equal(requiredElement<HTMLSelectElement>('sum-model-select').value, 'openai/gpt-oss-120b');
   assert.equal(requiredElement<HTMLSelectElement>('appearance-theme-select').value, 'dark');
   assert.deepEqual(
     [...requiredElement<HTMLSelectElement>('appearance-theme-select').options].map((option) => option.value),
@@ -171,7 +171,7 @@ test('settings page labels and scopes clear provider settings narrowly', async (
     if (method === 'GET' && urlText === 'http://localhost:8282/api/summarizer-config?key=main-secret') {
       return Response.json({
         provider: 'groq',
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         keys: {
           gemini: 'AIza-existing',
           groq: 'gsk_existing',
@@ -191,7 +191,7 @@ test('settings page labels and scopes clear provider settings narrowly', async (
 
     if (method === 'GET' && urlText === '/summarizer-models/groq.json') {
       return Response.json([
-        { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+        { value: 'openai/gpt-oss-120b', label: 'gpt-oss-120b' },
       ]);
     }
 

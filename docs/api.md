@@ -175,7 +175,7 @@ Summarize text using a configured AI provider (Gemini, Groq, or OpenRouter). The
 {
   "summary":  "## Key Points\n\n- ...",
   "provider": "groq",
-  "model":    "llama-3.3-70b-versatile"
+  "model":    "openai/gpt-oss-120b"
 }
 ```
 
@@ -224,7 +224,7 @@ Returns the server's current summarizer configuration. Does **not** expose the A
 ```json
 {
   "provider": "groq",
-  "model":    "llama-3.3-70b-versatile"
+  "model":    "openai/gpt-oss-120b"
 }
 ```
 

@@ -47,7 +47,7 @@ test('saveRuntimeConfig posts JSON through the shared runtime transport', async 
     path: '/api/summarizer-config',
     payload: {
       provider: 'groq',
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       keys: { gemini: '', groq: 'gsk_saved', openrouter: '' },
     },
     fetchImpl: async (url, options = {}) => {
@@ -60,5 +60,5 @@ test('saveRuntimeConfig posts JSON through the shared runtime transport', async 
   });
 
   assert.equal(result.provider, 'groq');
-  assert.equal(result.model, 'llama-3.3-70b-versatile');
+  assert.equal(result.model, 'openai/gpt-oss-120b');
 });
